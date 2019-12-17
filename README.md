@@ -1,2 +1,2 @@
 # Hangman-Mini-Game
-A simple hangman game without backend Thesaurus
+A simple browser based hangman game without backend Thesaurus
