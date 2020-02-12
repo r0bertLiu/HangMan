@@ -5,9 +5,12 @@
 </head>
 <body>
 	<div id = "content">
+
 		<div id='alphabetBtn'></div>
 
 		<div id='targetWord'></div>
+
+		<canvas id='hangmanCanvas' width="400" height="200" style="border:1px solid #000000;"></canvas>
 
 		<div id='counter'></div>
 		
@@ -26,7 +29,9 @@
 
 	#alphabet {
 		height: 150px;
-		padding:0;
+    padding: 0;
+    width: 450px;
+    margin-left: 50px
 	}
 
 	#alphabet li {
@@ -58,6 +63,12 @@
   		padding: 0 10px;
   		font-size:3.6em;
 	}
+
+	/* #hangmanCanvas {
+		width: 400;
+		height: 200;
+		border:1px solid #000000
+	} */
 
 	#counter {
   		margin: 10px;
@@ -133,8 +144,13 @@
 	"ruby",
 	"python",
 	"error",
-	"pixel"
+	"pixel" ,
+	"stack"
 	];
+
+	// create canvas
+	var c = document.getElementById("hangmanCanvas")
+	var ctx = c.getContext("2d")
 
 	// function to create alph buttons
 	var createButtons = function() {
@@ -188,10 +204,10 @@
 	var clickLetter = function() {
 		var _letter = this.innerHTML
 		var hidden_letters = document.getElementById('hiddenLetters')
-		// keep tracking _letter in targer word until all index are found
+		// keep tracking _letter in targer word until all index are checked
 		n = -1
 		while(true) {
-			n = target_word.indexOf(_letter, n); //start from index "n"
+			n = target_word.indexOf(_letter, n) //find _letter start from index "n"
 			if (n === -1) break
 			hidden_letters.children[n].innerHTML = _letter
 			correct_letters++ 
@@ -201,8 +217,11 @@
 		// exclude this letter
 		excludeLetter(this)
 
-		// move steps
-		lives--
+		// check lives
+		if (target_word.indexOf(_letter, -1) === -1) {
+			lives--
+			drawHangmanCanvas(lives)
+		}
 		var counter_div = document.getElementById('counter')
 		counter_div.innerHTML = `You have ${lives} lives left`
 		
@@ -214,9 +233,41 @@
 		if (lives === 0) gameOver("faild")
 		
 	}
+
+	// draw hangman Canvas
+	var drawHangmanCanvas = function(rest_lives){
+		ctx.strokeStyle = "#FF0000";
+		switch (rest_lives) {
+  		case 5:
+    		ctx.beginPath();
+				ctx.arc(200, 72.5, 20, 0, 2 * Math.PI)
+				break
+			case 4:
+				ctx.moveTo(200, 92.5)
+				ctx.lineTo(200, 125)
+				break
+			case 3:
+				ctx.moveTo(200, 100)
+				ctx.lineTo(175, 125)
+				break
+			case 2:
+				ctx.moveTo(200, 100)
+				ctx.lineTo(225, 125)
+				break
+			case 1:
+				ctx.moveTo(200, 125)
+				ctx.lineTo(175, 175)
+				break
+			case 0:
+				ctx.moveTo(200, 125)
+				ctx.lineTo(225, 175)
+				break
+		}
+		ctx.stroke()
+	}
 	
 	// jumpout game over window
-	var gameOver = function (trigger){
+	var gameOver = function(trigger){
 		var modal = document.getElementById("modalID")
 		modal.style.display = "block"
 		var modal_content = modal.firstChild
@@ -253,7 +304,7 @@
 
 	var initStatus = function() {
 		// init counters
-		lives = 10
+		lives = 6
 		var counter_div = document.getElementById('counter')
 		counter_div.innerHTML = `You have ${lives} lives left`
 
@@ -280,6 +331,21 @@
 		modal.appendChild(modal_content)
 	}
 
+	// init canvas
+	var initCanvas = function() {
+		ctx.strokeStyle = "#000000"
+		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+		ctx.beginPath();
+		ctx.moveTo(0, 200)
+		ctx.lineTo(25, 175)
+		ctx.lineTo(50, 200)
+		ctx.moveTo(25,175)
+		ctx.lineTo(25, 25)
+		ctx.lineTo(200,25)
+		ctx.lineTo(200,50)
+		ctx.stroke()
+	}
+
 	var startGame = function() {
 		// set Game global var
 		var target_word
@@ -290,6 +356,7 @@
 		initTarget()
 		initStatus()
 		initModal()
+		initCanvas()
 	}
 
 	startGame()
